@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Earth Hour Mission</title>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --leaf:#4a9c2f; --glow:#7ed957; --gold:#f5c518;
+  --dark:#0a1a05; --panel:#111f0a; --card:#162610; --text:#d4edaa;
+  --muted:#6b8f5a; --danger:#e05555; --accent:#57d9c5;
+  --sb: env(safe-area-inset-bottom, 0px);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow-x:hidden;}
+body{font-family:'Kanit',sans-serif;background:var(--dark);color:var(--text);min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(74,156,47,.1) 0%,transparent 60%),radial-gradient(ellipse at 80% 10%,rgba(87,217,197,.06) 0%,transparent 50%);pointer-events:none;z-index:0;}
+
+.screen{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;overflow:hidden;}
+.screen.hidden{display:none;}
+
+/* ── SPLASH ── */
+#splashScreen{background:var(--dark);align-items:center;justify-content:center;padding:24px;overflow-y:auto;}
+.splash-inner{display:flex;flex-direction:column;align-items:center;text-align:center;max-width:380px;width:100%;padding:20px 0;}
+.splash-globe{font-size:68px;margin-bottom:4px;animation:float 3s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.splash-title{font-size:26px;font-weight:900;color:var(--glow);line-height:1.15;margin-bottom:6px;}
+.splash-sub{font-size:13px;color:var(--muted);margin-bottom:32px;line-height:1.6;}
+.splash-btn{width:100%;padding:17px;border:none;border-radius:16px;font-family:'Kanit',sans-serif;font-weight:700;cursor:pointer;margin-bottom:11px;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .2s;}
+.splash-btn:active{transform:scale(.97);}
+.splash-btn-main{background:linear-gradient(135deg,var(--leaf),var(--glow));color:var(--dark);font-size:17px;box-shadow:0 8px 22px rgba(126,217,87,.35);}
+.splash-btn-register{background:rgba(87,217,197,.12);color:var(--accent);border:1.5px solid rgba(87,217,197,.3);font-size:15px;padding:14px;}
+.splash-btn-admin{background:rgba(255,255,255,.05);color:var(--muted);border:1px solid rgba(255,255,255,.1);font-size:13px;padding:13px;}
+
+/* ── EMPLOYEE ── */
+#empScreen{background:var(--dark);}
+.emp-header{position:relative;z-index:10;padding:14px 18px 12px;background:rgba(10,26,5,.95);border-bottom:1px solid rgba(126,217,87,.12);backdrop-filter:blur(12px);display:flex;align-items:center;gap:12px;flex-shrink:0;}
+.emp-header-logo{width:34px;height:34px;background:linear-gradient(135deg,var(--leaf),var(--glow));border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+.emp-header-user{flex:1;min-width:0;}
+.emp-header-name{font-size:14px;font-weight:700;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.emp-header-dept{font-size:10px;color:var(--muted);}
+.emp-change-btn{padding:6px 12px;border:1px solid rgba(126,217,87,.25);border-radius:20px;background:rgba(126,217,87,.08);color:var(--glow);font-family:'Kanit',sans-serif;font-size:11px;font-weight:600;cursor:pointer;flex-shrink:0;}
+.emp-scroll{flex:1;overflow-y:auto;padding:14px;padding-bottom:calc(20px + var(--sb));}
+
+/* hero */
+.hero-card{background:var(--card);border:1px solid rgba(87,217,197,.2);border-radius:20px;padding:18px;margin-bottom:14px;position:relative;overflow:hidden;}
+.hero-card::before{content:'';position:absolute;right:-18px;top:-18px;width:110px;height:110px;background:radial-gradient(circle,rgba(87,217,197,.08),transparent 70%);pointer-events:none;}
+.hero-emoji{font-size:36px;margin-bottom:6px;}
+.hero-name{font-size:19px;font-weight:900;color:white;}
+.hero-dept{font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;margin-top:2px;}
+.hero-prow{display:flex;align-items:center;gap:11px;margin-top:13px;}
+.hero-pbar{flex:1;height:7px;background:rgba(126,217,87,.12);border-radius:7px;overflow:hidden;}
+.hero-pfill{height:100%;background:linear-gradient(90deg,var(--leaf),var(--glow));border-radius:7px;transition:width .6s;}
+.hero-ptext{font-size:13px;font-weight:700;color:var(--glow);font-family:'Space Mono',monospace;flex-shrink:0;}
+.hero-stats{display:flex;margin-top:12px;border:1px solid rgba(126,217,87,.12);border-radius:11px;overflow:hidden;}
+.hero-stat{flex:1;padding:9px 6px;text-align:center;border-right:1px solid rgba(126,217,87,.1);}
+.hero-stat:last-child{border-right:none;}
+.hero-stat-num{font-size:18px;font-weight:900;font-family:'Space Mono',monospace;line-height:1;}
+.hero-stat-lbl{font-size:9px;color:var(--muted);margin-top:2px;}
+.win-badge{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#2a1f00,#3d2d00);border:1.5px solid var(--gold);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:700;color:var(--gold);margin-top:10px;animation:shimmer 1.5s infinite;}
+@keyframes shimmer{0%,100%{opacity:1}50%{opacity:.75}}
+
+/* xo board */
+.section-title{font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;margin-bottom:9px;}
+.xo-board-card{background:var(--card);border:1px solid rgba(126,217,87,.12);border-radius:18px;padding:14px;margin-bottom:14px;}
+.xo-mini-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;}
+.xo-mini-cell{aspect-ratio:1;background:rgba(0,0,0,.25);border:1.5px solid rgba(126,217,87,.12);border-radius:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;padding:3px;}
+.xo-mini-cell:active{transform:scale(.94);}
+.xo-mini-cell.c-done{background:rgba(126,217,87,.1);border-color:rgba(126,217,87,.4);}
+.xo-mini-cell.c-pending{background:rgba(245,197,24,.08);border-color:rgba(245,197,24,.35);}
+.xo-mini-cell.c-win{background:rgba(245,197,24,.14);border-color:var(--gold);box-shadow:0 0 10px rgba(245,197,24,.2);}
+.cell-emoji{font-size:21px;line-height:1;}
+.cell-name{font-size:6.5px;color:var(--muted);text-align:center;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.cell-tick{position:absolute;top:2px;right:2px;width:13px;height:13px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;}
+.cell-tick.done{background:var(--glow);color:var(--dark);}
+.cell-tick.pending{background:var(--gold);color:var(--dark);}
+
+/* mission list */
+.mission-list{display:flex;flex-direction:column;gap:9px;margin-bottom:14px;}
+.mission-row{background:var(--card);border:1.5px solid rgba(126,217,87,.1);border-radius:15px;padding:13px 14px;display:flex;align-items:center;gap:11px;cursor:pointer;transition:all .2s;}
+.mission-row:active{transform:scale(.98);}
+.mission-row.m-done{border-color:rgba(126,217,87,.28);}
+.mission-row.m-pending{border-color:rgba(245,197,24,.28);}
+.mr-emoji{font-size:24px;flex-shrink:0;}
+.mr-info{flex:1;min-width:0;}
+.mr-name{font-size:13px;font-weight:700;color:white;}
+.mr-desc{font-size:10px;color:var(--muted);margin-top:2px;line-height:1.4;}
+.badge{display:inline-flex;align-items:center;gap:3px;padding:5px 11px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap;}
+.b-done{background:rgba(126,217,87,.18);color:var(--glow);border:1px solid rgba(126,217,87,.3);}
+.b-pending{background:rgba(245,197,24,.18);color:var(--gold);border:1px solid rgba(245,197,24,.3);}
+.b-go{background:linear-gradient(135deg,var(--leaf),var(--glow));color:var(--dark);padding:6px 13px;font-size:12px;}
+
+/* leaderboard */
+.leaderboard{display:flex;flex-direction:column;gap:9px;}
+.lb-card{background:var(--card);border:1.5px solid rgba(126,217,87,.1);border-radius:15px;overflow:hidden;}
+.lb-card.lb-winner{border-color:var(--gold);animation:wPulse 2s infinite;}
+.lb-card.lb-me{border-color:rgba(87,217,197,.4);}
+@keyframes wPulse{0%,100%{box-shadow:0 0 14px rgba(245,197,24,.15)}50%{box-shadow:0 0 26px rgba(245,197,24,.4)}}
+.lb-header{padding:11px 13px;background:rgba(0,0,0,.2);display:flex;align-items:center;gap:9px;}
+.lb-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--leaf),var(--accent));display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.lb-info{flex:1;min-width:0;}
+.lb-name{font-size:13px;font-weight:700;color:white;}
+.lb-dept{font-size:10px;color:var(--muted);}
+.lb-score{font-size:18px;font-weight:900;color:var(--glow);font-family:'Space Mono',monospace;}
+.lb-mini-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:7px;}
+.lb-cell{aspect-ratio:1;border-radius:7px;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.2);border:1px solid rgba(126,217,87,.06);position:relative;font-size:13px;}
+.lb-cell.lc-done{background:rgba(126,217,87,.09);border-color:rgba(126,217,87,.25);}
+.lb-cell.lc-pending{background:rgba(245,197,24,.07);border-color:rgba(245,197,24,.22);}
+.lb-cell.lc-win{background:rgba(245,197,24,.13);border-color:var(--gold);}
+.lb-win-banner{background:linear-gradient(135deg,#2a1f00,#3d2d00);border-top:1px solid rgba(245,197,24,.3);padding:6px;text-align:center;font-size:12px;font-weight:700;color:var(--gold);}
+.lb-prog{height:3px;background:rgba(126,217,87,.1);margin:0 7px 7px;}
+.lb-prog-fill{height:100%;background:linear-gradient(90deg,var(--leaf),var(--glow));border-radius:3px;}
+
+/* bottom nav */
+.bottom-nav{position:sticky;bottom:0;background:rgba(10,26,5,.97);border-top:1px solid rgba(126,217,87,.15);display:grid;grid-template-columns:1fr 1fr;padding:7px 14px;padding-bottom:calc(7px + var(--sb));gap:7px;flex-shrink:0;backdrop-filter:blur(12px);}
+.bnav-btn{border:none;background:transparent;font-family:'Kanit',sans-serif;color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;padding:7px;border-radius:11px;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:2px;}
+.bnav-btn.active{color:var(--glow);background:rgba(126,217,87,.1);}
+.bnav-icon{font-size:21px;line-height:1;}
+
+/* ── ADMIN ── */
+#adminScreen{background:var(--dark);}
+.admin-header{padding:14px 18px;background:rgba(10,26,5,.95);border-bottom:1px solid rgba(224,85,85,.15);display:flex;align-items:center;gap:11px;flex-shrink:0;}
+.admin-header-logo{width:34px;height:34px;background:linear-gradient(135deg,#8b2c2c,#e05555);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+.admin-header-title{flex:1;font-size:15px;font-weight:700;color:white;}
+.admin-back-btn{padding:6px 12px;border:1px solid rgba(224,85,85,.3);border-radius:20px;background:rgba(224,85,85,.08);color:var(--danger);font-family:'Kanit',sans-serif;font-size:11px;font-weight:600;cursor:pointer;}
+.admin-scroll{flex:1;overflow-y:auto;padding:14px;padding-bottom:calc(80px + var(--sb));}
+.admin-tabs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:14px;}
+.admin-tab{padding:10px;border-radius:10px;border:1px solid rgba(126,217,87,.1);font-family:'Kanit',sans-serif;font-size:12px;font-weight:600;cursor:pointer;background:var(--card);color:var(--muted);transition:all .2s;}
+.admin-tab.active{background:linear-gradient(135deg,var(--leaf),var(--glow));color:var(--dark);border-color:transparent;}
+.admin-stats{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:14px;}
+.astat{background:var(--card);border:1px solid rgba(126,217,87,.1);border-radius:13px;padding:13px;}
+.astat-num{font-size:22px;font-weight:900;color:var(--glow);font-family:'Space Mono',monospace;}
+.astat-lbl{font-size:10px;color:var(--muted);margin-top:2px;}
+.admin-player-list{display:flex;flex-direction:column;gap:9px;}
+.apl-card{background:var(--card);border:1.5px solid rgba(126,217,87,.1);border-radius:15px;overflow:hidden;}
+.apl-header{padding:11px 13px;background:rgba(0,0,0,.2);display:flex;align-items:center;gap:9px;cursor:pointer;}
+.apl-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--leaf),var(--accent));display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+.apl-info{flex:1;min-width:0;}
+.apl-name{font-size:13px;font-weight:700;color:white;}
+.apl-dept{font-size:10px;color:var(--muted);}
+.apl-score{font-size:16px;font-weight:900;font-family:'Space Mono',monospace;color:var(--glow);margin-right:5px;}
+.apl-toggle{color:var(--muted);font-size:12px;transition:transform .2s;}
+.apl-toggle.open{transform:rotate(180deg);}
+.apl-body{padding:9px 11px;display:flex;flex-direction:column;gap:6px;}
+.apl-body.collapsed{display:none;}
+.apl-actions{display:none;gap:7px;padding:9px 13px 11px;border-top:1px solid rgba(126,217,87,.08);}
+.amr{background:rgba(0,0,0,.15);border-radius:11px;padding:11px;border:1px solid rgba(126,217,87,.06);}
+.amr-top{display:flex;align-items:center;gap:9px;margin-bottom:7px;}
+.amr-emoji{font-size:18px;flex-shrink:0;}
+.amr-name{font-size:12px;font-weight:600;color:var(--text);flex:1;}
+.amr-status{font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;}
+.s-done{background:rgba(126,217,87,.18);color:var(--glow);}
+.s-pending{background:rgba(245,197,24,.18);color:var(--gold);}
+.s-none{background:rgba(255,255,255,.06);color:var(--muted);}
+.amr-evidence{border-radius:8px;overflow:hidden;margin-bottom:7px;cursor:zoom-in;}
+.amr-evidence img{width:100%;max-height:140px;object-fit:cover;display:block;}
+.amr-note{background:rgba(87,217,197,.08);border:1px solid rgba(87,217,197,.2);color:var(--accent);border-radius:7px;padding:5px 9px;font-size:11px;margin-bottom:7px;}
+.amr-btns{display:flex;gap:5px;flex-wrap:wrap;}
+
+/* pending-register card */
+.reg-card{background:var(--card);border:1.5px solid rgba(245,197,24,.25);border-radius:15px;padding:14px;display:flex;align-items:center;gap:11px;}
+.reg-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#3d2d00,var(--gold));display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.reg-info{flex:1;min-width:0;}
+.reg-name{font-size:14px;font-weight:700;color:white;}
+.reg-dept{font-size:11px;color:var(--muted);margin-top:1px;}
+.reg-btns{display:flex;gap:6px;flex-shrink:0;}
+
+.fab{position:fixed;bottom:calc(18px + var(--sb));right:18px;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--leaf),var(--glow));border:none;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 5px 18px rgba(126,217,87,.4);z-index:50;transition:all .2s;}
+.fab:active{transform:scale(.92);}
+
+/* ── MODALS ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;backdrop-filter:blur(4px);}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal{background:var(--panel);border-radius:22px 22px 0 0;border:1px solid rgba(126,217,87,.15);border-bottom:none;width:100%;max-width:600px;max-height:92vh;overflow-y:auto;transform:translateY(100%);transition:transform .3s cubic-bezier(.32,0,.67,0);}
+.modal-overlay.open .modal{transform:translateY(0);transition:transform .3s cubic-bezier(.22,1,.36,1);}
+.modal-handle{width:38px;height:4px;background:rgba(255,255,255,.18);border-radius:2px;margin:11px auto 0;}
+.modal-header{padding:15px 20px 11px;display:flex;align-items:center;justify-content:space-between;}
+.modal-title{font-size:16px;font-weight:700;color:white;}
+.modal-close{width:30px;height:30px;border-radius:50%;border:1px solid rgba(126,217,87,.2);background:rgba(126,217,87,.08);color:var(--muted);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;}
+.modal-body{padding:2px 20px 14px;}
+.modal-footer{padding:10px 20px;padding-bottom:calc(14px + var(--sb));display:flex;gap:9px;}
+.form-group{margin-bottom:13px;}
+.form-label{display:block;font-size:11px;font-weight:600;color:var(--muted);margin-bottom:5px;letter-spacing:.04em;}
+.form-input,.form-select{width:100%;padding:12px 13px;background:rgba(0,0,0,.3);border:1.5px solid rgba(126,217,87,.2);border-radius:11px;color:var(--text);font-family:'Kanit',sans-serif;font-size:16px;outline:none;transition:border-color .2s;-webkit-appearance:none;}
+.form-input:focus,.form-select:focus{border-color:rgba(126,217,87,.5);}
+.form-select option{background:#1a2e10;}
+textarea.form-input{resize:vertical;min-height:80px;font-size:14px;}
+.emoji-grid{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:9px;}
+.ep-item{font-size:24px;padding:5px;border-radius:9px;cursor:pointer;border:2px solid transparent;transition:all .15s;}
+.ep-item.selected{border-color:var(--glow);background:rgba(126,217,87,.15);}
+.ev-upload{border:2px dashed rgba(126,217,87,.25);border-radius:13px;padding:20px;text-align:center;cursor:pointer;margin-bottom:11px;transition:all .2s;}
+.ev-upload:active{border-color:rgba(126,217,87,.5);background:rgba(126,217,87,.06);}
+.ev-upload-icon{font-size:30px;margin-bottom:7px;}
+.ev-preview{border-radius:11px;overflow:hidden;margin-bottom:11px;position:relative;}
+.ev-preview img{width:100%;max-height:200px;object-fit:cover;display:block;}
+.ev-remove{position:absolute;top:7px;right:7px;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,.75);border:none;color:white;font-size:13px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.file-hidden{display:none;}
+.mission-detail-box{background:rgba(0,0,0,.2);border-radius:11px;padding:13px;margin-bottom:13px;display:flex;gap:11px;}
+.md-emoji{font-size:30px;flex-shrink:0;}
+.md-title{font-size:14px;font-weight:700;color:white;margin-bottom:3px;}
+.md-desc{font-size:11px;color:var(--muted);line-height:1.5;}
+.done-state{text-align:center;padding:18px 10px;}
+.done-state .big-icon{font-size:52px;margin-bottom:9px;}
+
+.btn{padding:12px 18px;border:none;border-radius:11px;font-family:'Kanit',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;justify-content:center;gap:6px;}
+.btn:active{transform:scale(.96);}
+.btn-primary{background:linear-gradient(135deg,var(--leaf),var(--glow));color:var(--dark);flex:1;box-shadow:0 4px 13px rgba(126,217,87,.3);}
+.btn-ghost{background:rgba(126,217,87,.1);color:var(--glow);border:1px solid rgba(126,217,87,.25);}
+.btn-danger{background:rgba(224,85,85,.15);color:var(--danger);border:1px solid rgba(224,85,85,.3);}
+.btn-accent{background:rgba(87,217,197,.15);color:var(--accent);border:1px solid rgba(87,217,197,.3);}
+.btn-gold{background:rgba(245,197,24,.15);color:var(--gold);border:1px solid rgba(245,197,24,.3);}
+.btn-sm{padding:7px 13px;font-size:11px;border-radius:9px;flex:none;}
+
+.id-tag{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;font-size:9px;font-family:'Space Mono',monospace;margin-top:2px;}
+.it-staff{background:rgba(87,217,197,.15);color:var(--accent);border:1px solid rgba(87,217,197,.25);}
+.it-supervisor{background:rgba(126,217,87,.15);color:var(--glow);border:1px solid rgba(126,217,87,.25);}
+.it-manager{background:rgba(245,197,24,.15);color:var(--gold);border:1px solid rgba(245,197,24,.25);}
+
+/* pending badge on admin tab */
+.tab-badge{display:inline-flex;align-items:center;justify-content:center;background:var(--danger);color:white;border-radius:50%;width:16px;height:16px;font-size:9px;font-weight:900;margin-left:4px;vertical-align:middle;}
+
+/* success toast */
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-80px);background:var(--card);border:1px solid rgba(126,217,87,.3);border-radius:20px;padding:10px 20px;font-size:13px;font-weight:600;color:var(--glow);z-index:999;transition:transform .35s cubic-bezier(.22,1,.36,1);white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.4);}
+.toast.show{transform:translateX(-50%) translateY(0);}
+
+/* winner */
+.winner-ov{position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.93);backdrop-filter:blur(8px);opacity:0;pointer-events:none;transition:opacity .4s;}
+.winner-ov.show{opacity:1;pointer-events:all;}
+.winner-box{text-align:center;animation:popIn .5s cubic-bezier(.34,1.56,.64,1);padding:24px;}
+@keyframes popIn{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+.w-trophy{font-size:76px;filter:drop-shadow(0 0 18px rgba(245,197,24,.6));margin-bottom:6px;}
+.w-title{font-size:50px;font-weight:900;background:linear-gradient(135deg,var(--gold),#fff,var(--gold));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.w-name{font-size:21px;font-weight:700;color:white;margin-top:9px;}
+.w-dept{font-size:12px;color:var(--muted);margin-top:3px;font-family:'Space Mono',monospace;}
+.w-stars{display:flex;gap:7px;justify-content:center;margin:13px 0;font-size:26px;}
+.w-star{animation:twinkle .8s infinite alternate;}
+.w-star:nth-child(2){animation-delay:.2s}.w-star:nth-child(3){animation-delay:.4s}
+@keyframes twinkle{from{transform:scale(1)}to{transform:scale(1.2)}}
+::-webkit-scrollbar{width:0;}
+</style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div class="screen" id="splashScreen">
+  <div class="splash-inner">
+    <div class="splash-globe">🌍</div>
+    <div class="splash-title">Earth Hour<br>Mission</div>
+    <div class="splash-sub">ร่วมพิทักษ์โลกผ่านภารกิจ<br>ทำครบ 2 แถว รับ Winner! 🏆</div>
+
+    <button class="splash-btn splash-btn-main" onclick="goEmployee()">
+      🙋 เข้าสู่ภารกิจของฉัน
+    </button>
+    <button class="splash-btn splash-btn-register" onclick="openRegister()">
+      ✍️ ลงทะเบียนเข้าร่วมใหม่
+    </button>
+    <button class="splash-btn splash-btn-admin" onclick="openAdminLogin()">
+      🔐 Admin เท่านั้น
+    </button>
+  </div>
+</div>
+
+<!-- EMPLOYEE -->
+<div class="screen hidden" id="empScreen">
+  <div class="emp-header">
+    <div class="emp-header-logo">🌿</div>
+    <div class="emp-header-user">
+      <div class="emp-header-name" id="empHeaderName">-</div>
+      <div class="emp-header-dept" id="empHeaderDept">-</div>
+    </div>
+    <button class="emp-change-btn" onclick="changeEmployee()">เปลี่ยน</button>
+  </div>
+  <div class="emp-scroll" id="empScroll"></div>
+  <div class="bottom-nav">
+    <button class="bnav-btn active" id="bnav0" onclick="empTab(0)"><div class="bnav-icon">🎯</div>ภารกิจ</button>
+    <button class="bnav-btn" id="bnav1" onclick="empTab(1)"><div class="bnav-icon">📋</div>กระดานรวม</button>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div class="screen hidden" id="adminScreen">
+  <div class="admin-header">
+    <div class="admin-header-logo">⚙️</div>
+    <div class="admin-header-title">Admin Panel</div>
+    <button class="admin-back-btn" onclick="goHome()">← ออก</button>
+  </div>
+  <div class="admin-scroll">
+    <div class="admin-tabs">
+      <button class="admin-tab active" id="atab0" onclick="adminTab(0)">👥 สมาชิก</button>
+      <button class="admin-tab" id="atab1" onclick="adminTab(1)">⏳ รออนุมัติ<span class="tab-badge" id="pendingRegBadge" style="display:none">0</span></button>
+      <button class="admin-tab" id="atab2" onclick="adminTab(2)">📊 ภาพรวม</button>
+    </div>
+    <div id="adminContent"></div>
+  </div>
+  <button class="fab" onclick="openAddPlayer()">＋</button>
+</div>
+
+<!-- MODAL: Select employee -->
+<div class="modal-overlay" id="selectEmpModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div class="modal-title">🙋 เลือกชื่อของคุณ</div>
+      <button class="modal-close" onclick="closeModal('selectEmpModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px;">เลือกชื่อเพื่อดูและทำภารกิจ Earth Hour</p>
+      <div id="empSelectList" style="display:flex;flex-direction:column;gap:8px;"></div>
+      <div id="empSelectEmpty" style="text-align:center;padding:24px;color:var(--muted);display:none;font-size:13px;line-height:1.8;"></div>
+    </div>
+    <div class="modal-footer" id="empSelectFooter"></div>
+  </div>
+</div>
+
+<!-- MODAL: Register -->
+<div class="modal-overlay" id="registerModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div class="modal-title">✍️ ลงทะเบียนเข้าร่วม</div>
+      <button class="modal-close" onclick="closeModal('registerModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="background:rgba(87,217,197,.07);border:1px solid rgba(87,217,197,.2);border-radius:11px;padding:11px 13px;margin-bottom:14px;font-size:12px;color:var(--accent);line-height:1.6;">
+        📋 กรอกข้อมูลของคุณ แล้วรอ Admin อนุมัติก่อนเข้าใช้งาน
+      </div>
+      <div class="form-group"><label class="form-label">ชื่อ-นามสกุล *</label><input class="form-input" id="regName" placeholder="ระบุชื่อ-นามสกุล..." /></div>
+      <div class="form-group"><label class="form-label">แผนก *</label><input class="form-input" id="regDept" placeholder="ระบุแผนก..." /></div>
+      <div class="form-group"><label class="form-label">ตำแหน่ง</label>
+        <select class="form-select" id="regRole">
+          <option value="staff">👤 พนักงาน (Staff)</option>
+          <option value="supervisor">👑 หัวหน้า (Supervisor)</option>
+          <option value="manager">🎯 ผู้จัดการ (Manager)</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">เลือกอิโมจิตัวแทน</label>
+        <div class="emoji-grid" id="regEmojiGrid">
+          <span class="ep-item selected" data-g="reg" data-e="🌿">🌿</span>
+          <span class="ep-item" data-g="reg" data-e="🌱">🌱</span>
+          <span class="ep-item" data-g="reg" data-e="🌍">🌍</span>
+          <span class="ep-item" data-g="reg" data-e="⚡">⚡</span>
+          <span class="ep-item" data-g="reg" data-e="💧">💧</span>
+          <span class="ep-item" data-g="reg" data-e="🌸">🌸</span>
+          <span class="ep-item" data-g="reg" data-e="🦋">🦋</span>
+          <span class="ep-item" data-g="reg" data-e="🌞">🌞</span>
+          <span class="ep-item" data-g="reg" data-e="🐝">🐝</span>
+          <span class="ep-item" data-g="reg" data-e="🌊">🌊</span>
+          <span class="ep-item" data-g="reg" data-e="🌵">🌵</span>
+          <span class="ep-item" data-g="reg" data-e="🍃">🍃</span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('registerModal')">ยกเลิก</button>
+      <button class="btn btn-primary" onclick="submitRegister()">ส่งคำขอ →</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Admin PW -->
+<div class="modal-overlay" id="adminPwModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div class="modal-title">🔐 Admin Login</div>
+      <button class="modal-close" onclick="closeModal('adminPwModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="background:rgba(0,0,0,.25);border-radius:13px;padding:18px;">
+        <div class="form-group">
+          <label class="form-label">รหัสผ่าน Admin</label>
+          <input class="form-input" id="adminPwInput" type="password" placeholder="ระบุรหัสผ่าน..." onkeyup="if(event.key==='Enter')checkPw()" />
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('adminPwModal')">ยกเลิก</button>
+      <button class="btn btn-primary" onclick="checkPw()">เข้าสู่ระบบ →</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Add/Edit Player (admin) -->
+<div class="modal-overlay" id="addPlayerModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div class="modal-title" id="addPlayerTitle">➕ เพิ่มผู้เข้าร่วม</div>
+      <button class="modal-close" onclick="closeModal('addPlayerModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">ชื่อ-นามสกุล</label><input class="form-input" id="inputName" placeholder="ระบุชื่อ..." /></div>
+      <div class="form-group"><label class="form-label">แผนก</label><input class="form-input" id="inputDept" placeholder="ระบุแผนก..." /></div>
+      <div class="form-group"><label class="form-label">ตำแหน่ง</label>
+        <select class="form-select" id="inputRole">
+          <option value="staff">👤 พนักงาน (Staff)</option>
+          <option value="supervisor">👑 หัวหน้า (Supervisor)</option>
+          <option value="manager">🎯 ผู้จัดการ (Manager)</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">อิโมจิตัวแทน</label>
+        <div class="emoji-grid" id="addEmojiGrid">
+          <span class="ep-item" data-g="add" data-e="🌿">🌿</span><span class="ep-item" data-g="add" data-e="🌱">🌱</span>
+          <span class="ep-item" data-g="add" data-e="🌍">🌍</span><span class="ep-item" data-g="add" data-e="⚡">⚡</span>
+          <span class="ep-item" data-g="add" data-e="💧">💧</span><span class="ep-item" data-g="add" data-e="🌸">🌸</span>
+          <span class="ep-item" data-g="add" data-e="🦋">🦋</span><span class="ep-item" data-g="add" data-e="🌞">🌞</span>
+          <span class="ep-item" data-g="add" data-e="🐝">🐝</span><span class="ep-item" data-g="add" data-e="🌊">🌊</span>
+          <span class="ep-item" data-g="add" data-e="🌵">🌵</span><span class="ep-item" data-g="add" data-e="🍃">🍃</span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('addPlayerModal')">ยกเลิก</button>
+      <button class="btn btn-primary" onclick="savePlayer()">บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Mission -->
+<div class="modal-overlay" id="missionModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div class="modal-title" id="missionModalTitle">ภารกิจ</div>
+      <button class="modal-close" onclick="closeModal('missionModal')">✕</button>
+    </div>
+    <div class="modal-body" id="missionModalBody"></div>
+    <div class="modal-footer" id="missionModalFooter"></div>
+  </div>
+</div>
+
+<!-- WINNER -->
+<div class="winner-ov" id="winnerOv">
+  <div class="winner-box">
+    <div class="w-trophy">🏆</div>
+    <div class="w-title">WINNER!</div>
+    <div class="w-stars"><span class="w-star">⭐</span><span class="w-star">⭐</span><span class="w-star">⭐</span></div>
+    <div class="w-name" id="wName"></div>
+    <div class="w-dept" id="wDept"></div>
+    <button class="btn btn-primary" style="margin-top:22px;width:190px;" onclick="document.getElementById('winnerOv').classList.remove('show')">🎉 ยอดเยี่ยม!</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+const ADMIN_PW = 'admin123';
+const WIN_PATTERNS = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+const MISSIONS = [
+  {id:0,emoji:'☕',name:'ใช้แก้วส่วนตัว',desc:'ใช้แก้วส่วนตัวทั้งวัน สแกน QR เก็บดาวที่ HR',ev:true},
+  {id:1,emoji:'🪜',name:'ใช้บันไดแทนลิฟต์',desc:'ใช้บันไดแทนลิฟต์ 3 ครั้ง ถ่ายรูปเป็นหลักฐาน',ev:true},
+  {id:2,emoji:'🗑️',name:'เก็บขยะในพื้นที่',desc:'เก็บขยะในพื้นที่พนักงานอย่างน้อย 5 ชิ้น ถ่ายรูปหลักฐาน',ev:true},
+  {id:3,emoji:'🍽️',name:'ทานอาหารหมดจาน',desc:'ทานอาหารหมด ถ่ายรูปจานเกลี้ยงเป็นหลักฐาน',ev:true},
+  {id:4,emoji:'💡',name:'ตรวจปิดไฟ Back Office',desc:'ตรวจปิดไฟในพื้นที่ Back Office 1 จุด ถ่ายรูปหลักฐาน',ev:true},
+  {id:5,emoji:'📝',name:'เสนอไอเดียลดพลังงาน',desc:'เสนอ 1 ไอเดียลดพลังงานในแผนก ส่งข้อความ',ev:false},
+  {id:6,emoji:'🛍️',name:'นำถุงกระดาษแบ่งปัน',desc:'นำถุงกระดาษไปแบ่งปัน 1 ครั้ง สแกน QR เก็บดาวที่ FO',ev:true},
+  {id:7,emoji:'♻️',name:'แยกขยะถูกต้อง',desc:'แยกขยะถูกต้อง (ขวด/กระดาษ/ขยะทั่วไป) ถ่ายรูปตอนทิ้ง',ev:true},
+  {id:8,emoji:'💧',name:'รีฟิลน้ำจากจุดเติม',desc:'รีฟิลน้ำจากจุดเติมน้ำพนักงาน ถ่ายรูปหลักฐาน',ev:true},
+];
+
+let players = [];
+let pendingRegs = [];
+let currentEmpId = null;
+let empTabIdx = 0;
+let adminTabIdx = 0;
+let editingPlayerId = null;
+let selectedEmojiAdd = '🌿';
+let selectedEmojiReg = '🌿';
+let uploads = {};
+
+// ── GOOGLE APPS SCRIPT STORAGE ──
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbxcKNYLJ_oxVPGkssJAv38BZqs2h3xSPzKN2e2bGuITe8YU2LL9szSIgKBW7V_RrZag/exec';
+let saveTimer = null;
+
+// รูปภาพ base64 ใหญ่เกิน → เก็บใน localStorage ของเครื่องแทน (ไม่ sync ข้ามเครื่อง)
+// ข้อมูลสถานะ/ชื่อ/แผนก sync ผ่าน Google Sheet ทั้งหมด
+function stripImgs(ps) {
+  return ps.map(p => ({
+    ...p,
+    missions: p.missions.map(m => ({ ...m, evidenceData: null }))
+  }));
+}
+function saveImgsLocal() {
+  try {
+    const imgs = {};
+    players.forEach(p => {
+      p.missions.forEach((m, i) => { if (m.evidenceData) imgs[`${p.id}_${i}`] = m.evidenceData; });
+    });
+    localStorage.setItem('eh_imgs', JSON.stringify(imgs));
+  } catch(e) {}
+}
+function loadImgsLocal() {
+  try {
+    const imgs = JSON.parse(localStorage.getItem('eh_imgs') || '{}');
+    players.forEach(p => {
+      p.missions.forEach((m, i) => { if (imgs[`${p.id}_${i}`]) m.evidenceData = imgs[`${p.id}_${i}`]; });
+    });
+  } catch(e) {}
+}
+
+async function gasGet(key) {
+  try {
+    const res = await fetch(`${GAS_URL}?action=get&key=${encodeURIComponent(key)}`);
+    const j = await res.json();
+    return j.value ? JSON.parse(j.value) : null;
+  } catch(e) { return null; }
+}
+
+async function gasSet(key, value) {
+  try {
+    await fetch(GAS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action: 'set', key, value: JSON.stringify(value) })
+    });
+  } catch(e) { console.warn('gasSet error', e); }
+}
+
+// POST with URLSearchParams for Apps Script compatibility
+async function gasSetForm(key, value) {
+  try {
+    const params = new URLSearchParams();
+    params.set('action', 'set');
+    params.set('key', key);
+    params.set('value', JSON.stringify(value));
+    await fetch(GAS_URL, { method: 'POST', body: params });
+  } catch(e) {
+    // fallback: GET with value in param (for small payloads)
+    try {
+      await fetch(`${GAS_URL}?action=set&key=${encodeURIComponent(key)}&value=${encodeURIComponent(JSON.stringify(value))}`);
+    } catch(e2) { console.warn('gasSet fallback error', e2); }
+  }
+}
+
+async function save() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async () => {
+    saveImgsLocal();
+    await gasSetForm('players', stripImgs(players));
+  }, 800);
+}
+
+async function savePending() {
+  await gasSetForm('pending', pendingRegs);
+}
+
+async function load() {
+  const [pl, pe] = await Promise.all([gasGet('players'), gasGet('pending')]);
+  if (Array.isArray(pl)) players = pl;
+  if (Array.isArray(pe)) pendingRegs = pe;
+  loadImgsLocal(); // restore images from this device's localStorage
+}
+
+// ── HELPERS ──
+function checkWin(ms){const done=ms.map(m=>m.status==='done');const p=WIN_PATTERNS.filter(pt=>pt.every(i=>done[i]));return p.length>=2?p:null;}
+function roleTag(r){return{staff:['it-staff','👤','Staff'],supervisor:['it-supervisor','👑','Supervisor'],manager:['it-manager','🎯','Manager']}[r]||['it-staff','👤','Staff'];}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+
+// ── SCREENS ──
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));document.getElementById(id).classList.remove('hidden');}
+function goHome(){showScreen('splashScreen');}
+
+function goEmployee(){
+  const approved = players.filter(p=>p.approved!==false);
+  if(!currentEmpId||!approved.find(p=>p.id===currentEmpId)){openSelectEmployee(false);}
+  else{enterEmpScreen();}
+}
+function enterEmpScreen(){
+  const p=players.find(x=>x.id===currentEmpId);
+  if(!p){openSelectEmployee(false);return;}
+  document.getElementById('empHeaderName').textContent=p.emoji+' '+p.name;
+  document.getElementById('empHeaderDept').textContent=p.dept;
+  showScreen('empScreen');empTabIdx=0;renderEmpTab();setEmpNav(0);
+}
+function changeEmployee(){openSelectEmployee(true);}
+function openAdminLogin(){openModal('adminPwModal');setTimeout(()=>document.getElementById('adminPwInput').focus(),300);}
+
+function checkPw(){
+  const pw=document.getElementById('adminPwInput').value;
+  if(pw===ADMIN_PW){
+    document.getElementById('adminPwInput').value='';
+    closeModal('adminPwModal');
+    showScreen('adminScreen');adminTabIdx=0;
+    document.querySelectorAll('.admin-tab').forEach((t,i)=>t.classList.toggle('active',i===0));
+    renderAdminTab();updatePendingBadge();
+  } else {
+    const inp=document.getElementById('adminPwInput');
+    inp.style.borderColor='var(--danger)';inp.value='';
+    inp.placeholder='รหัสผ่านไม่ถูกต้อง ลองอีกครั้ง';
+    setTimeout(()=>{inp.style.borderColor='';inp.placeholder='ระบุรหัสผ่าน...';},1500);
+  }
+}
+
+// ── REGISTER ──
+function openRegister(){
+  document.getElementById('regName').value='';
+  document.getElementById('regDept').value='';
+  document.getElementById('regRole').value='staff';
+  setEmojiGroup('reg','🌿');
+  openModal('registerModal');
+  setTimeout(()=>document.getElementById('regName').focus(),350);
+}
+
+async function submitRegister(){
+  const name=document.getElementById('regName').value.trim();
+  const dept=document.getElementById('regDept').value.trim();
+  const role=document.getElementById('regRole').value;
+  if(!name||!dept){alert('กรุณากรอกชื่อและแผนก');return;}
+  const dupPending=pendingRegs.find(r=>r.name.toLowerCase()===name.toLowerCase()&&r.dept.toLowerCase()===dept.toLowerCase());
+  const dupApproved=players.find(r=>r.name.toLowerCase()===name.toLowerCase()&&r.dept.toLowerCase()===dept.toLowerCase());
+  if(dupPending){alert('ชื่อนี้อยู่ระหว่างรอการอนุมัติอยู่แล้วค่ะ');return;}
+  if(dupApproved){alert('ชื่อนี้ได้รับการอนุมัติแล้ว กรุณาเลือกชื่อจากรายการ');return;}
+  pendingRegs.push({id:Date.now(),name,dept,role,emoji:selectedEmojiReg,submittedAt:new Date().toLocaleString('th-TH')});
+  await savePending();closeModal('registerModal');
+  showToast('✅ ส่งคำขอแล้ว! รอ Admin อนุมัติก่อนนะคะ');
+}
+
+async function approvePending(id){
+  const reg=pendingRegs.find(r=>r.id===id); if(!reg) return;
+  players.push({id:Date.now(),name:reg.name,dept:reg.dept,role:reg.role,emoji:reg.emoji,missions:MISSIONS.map(()=>({status:'none',evidenceData:null,note:null}))});
+  pendingRegs=pendingRegs.filter(r=>r.id!==id);
+  await save();await savePending();renderAdminTab();updatePendingBadge();
+  showToast('✅ อนุมัติ '+reg.name+' แล้ว!');
+}
+async function rejectPending(id){
+  const reg=pendingRegs.find(r=>r.id===id); if(!reg) return;
+  if(!confirm('ปฏิเสธคำขอของ '+reg.name+'?')) return;
+  pendingRegs=pendingRegs.filter(r=>r.id!==id);
+  await savePending();renderAdminTab();updatePendingBadge();
+}
+function updatePendingBadge(){
+  const b=document.getElementById('pendingRegBadge');
+  if(pendingRegs.length>0){b.style.display='inline-flex';b.textContent=pendingRegs.length;}
+  else{b.style.display='none';}
+}
+
+// ── SELECT EMPLOYEE ──
+function openSelectEmployee(allowClose){
+  const list=document.getElementById('empSelectList');
+  const empty=document.getElementById('empSelectEmpty');
+  const footer=document.getElementById('empSelectFooter');
+  list.innerHTML='';
+  const approved=players; // all are approved now
+  if(!approved.length){
+    list.style.display='none';empty.style.display='block';
+    empty.innerHTML='ยังไม่มีผู้เข้าร่วม 😊<br><br><button class="btn btn-accent" style="width:100%;margin-top:4px;" onclick="closeModal(\'selectEmpModal\');openRegister()">✍️ ลงทะเบียนเข้าร่วม</button>';
+  } else {
+    list.style.display='flex';empty.style.display='none';
+    approved.forEach(p=>{
+      const done=p.missions.filter(m=>m.status==='done').length;
+      const winP=checkWin(p.missions);
+      const btn=document.createElement('button');
+      btn.style.cssText='width:100%;background:var(--card);border:1.5px solid rgba(126,217,87,.12);border-radius:13px;padding:12px 14px;cursor:pointer;display:flex;align-items:center;gap:11px;font-family:Kanit,sans-serif;text-align:left;transition:all .2s;';
+      if(p.id===currentEmpId)btn.style.borderColor='var(--accent)';
+      const [rc,ri,rl]=roleTag(p.role);
+      btn.innerHTML=`<div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--leaf),var(--accent));display:flex;align-items:center;justify-content:center;font-size:21px;flex-shrink:0;">${p.emoji}</div><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:700;color:white;">${p.name} ${winP?'🏆':''}</div><div style="font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;">${p.dept}</div><span class="id-tag ${rc}" style="margin-top:2px;">${ri} ${rl}</span></div><div style="text-align:right;"><div style="font-size:18px;font-weight:900;color:var(--glow);font-family:'Space Mono',monospace;">${done}</div><div style="font-size:9px;color:var(--muted);">/ 9 ✓</div></div>`;
+      btn.addEventListener('click',()=>{currentEmpId=p.id;closeModal('selectEmpModal');setTimeout(()=>enterEmpScreen(),200);});
+      list.appendChild(btn);
+    });
+  }
+  // register link at bottom
+  const regLink=document.createElement('button');
+  regLink.className='btn btn-accent';
+  regLink.style.cssText='width:100%;margin-top:10px;';
+  regLink.innerHTML='✍️ ลงทะเบียนชื่อใหม่';
+  regLink.onclick=()=>{closeModal('selectEmpModal');openRegister();};
+  list.appendChild(regLink);
+
+  const closeBtn=document.querySelector('#selectEmpModal .modal-close');
+  if(allowClose){closeBtn.style.display='flex';footer.innerHTML='';}
+  else{closeBtn.style.display='none';footer.innerHTML='<button class="btn btn-ghost" onclick="goHome()" style="flex:1;">← กลับหน้าหลัก</button>';}
+  openModal('selectEmpModal');
+}
+
+// ── EMP TABS ──
+function empTab(idx){empTabIdx=idx;renderEmpTab();setEmpNav(idx);}
+function setEmpNav(idx){document.querySelectorAll('.bnav-btn').forEach((b,i)=>b.classList.toggle('active',i===idx));}
+function renderEmpTab(){const s=document.getElementById('empScroll');s.innerHTML='';if(empTabIdx===0)renderMyMissions(s);else renderLeaderboard(s);s.scrollTop=0;}
+
+function renderMyMissions(container){
+  const p=players.find(x=>x.id===currentEmpId); if(!p) return;
+  const winP=checkWin(p.missions),done=p.missions.filter(m=>m.status==='done').length,pend=p.missions.filter(m=>m.status==='pending').length,winCells=winP?winP.flat():[];
+  const [rc,ri,rl]=roleTag(p.role);
+  // hero
+  const hero=document.createElement('div');hero.className='hero-card';
+  hero.innerHTML=`<div style="display:flex;align-items:flex-start;justify-content:space-between;"><div><div class="hero-emoji">${p.emoji}</div><div class="hero-name">${p.name}</div><div class="hero-dept">${p.dept}</div><span class="id-tag ${rc}" style="margin-top:4px;">${ri} ${rl}</span></div><div style="text-align:right;"><div style="font-size:34px;font-weight:900;color:var(--glow);font-family:'Space Mono',monospace;line-height:1;">${done}</div><div style="font-size:10px;color:var(--muted);">/ 9 ภารกิจ</div></div></div><div class="hero-prow"><div class="hero-pbar"><div class="hero-pfill" style="width:${(done/9)*100}%"></div></div><div class="hero-ptext">${Math.round((done/9)*100)}%</div></div><div class="hero-stats"><div class="hero-stat"><div class="hero-stat-num" style="color:var(--glow);">${done}</div><div class="hero-stat-lbl">สำเร็จ</div></div><div class="hero-stat"><div class="hero-stat-num" style="color:var(--gold);">${pend}</div><div class="hero-stat-lbl">รอตรวจ</div></div><div class="hero-stat"><div class="hero-stat-num" style="color:var(--muted);">${9-done-pend}</div><div class="hero-stat-lbl">ยังไม่ทำ</div></div></div>${winP?'<div class="win-badge">🏆 ยินดีด้วย! คุณเป็น WINNER!</div>':''}`;
+  container.appendChild(hero);
+  // xo
+  const xo=document.createElement('div');xo.className='xo-board-card';
+  xo.innerHTML='<div class="section-title">กระดาน XO — แตะเพื่อส่งภารกิจ</div><div class="xo-mini-grid" id="myXoGrid"></div>';
+  container.appendChild(xo);
+  setTimeout(()=>{const xg=document.getElementById('myXoGrid');if(!xg)return;p.missions.forEach((m,i)=>{const def=MISSIONS[i],cell=document.createElement('div');let cls='xo-mini-cell';if(m.status==='done')cls+=' c-done';else if(m.status==='pending')cls+=' c-pending';if(winCells.includes(i))cls+=' c-win';cell.className=cls;const tick=m.status==='done'?'<div class="cell-tick done">✓</div>':m.status==='pending'?'<div class="cell-tick pending">⏳</div>':'';cell.innerHTML=`${tick}<div class="cell-emoji">${def.emoji}</div><div class="cell-name">${def.name}</div>`;cell.addEventListener('click',()=>openMission(p.id,i));xg.appendChild(cell);});},0);
+  // list
+  const lt=document.createElement('div');lt.className='section-title';lt.style.marginBottom='9px';lt.textContent='รายการภารกิจทั้งหมด';container.appendChild(lt);
+  const list=document.createElement('div');list.className='mission-list';
+  p.missions.forEach((m,i)=>{const def=MISSIONS[i],row=document.createElement('div');let cls='mission-row';if(m.status==='done')cls+=' m-done';else if(m.status==='pending')cls+=' m-pending';row.className=cls;const badge=m.status==='done'?'<span class="badge b-done">✅ สำเร็จ</span>':m.status==='pending'?'<span class="badge b-pending">⏳ รอตรวจ</span>':'<span class="badge b-go">ส่งเลย →</span>';row.innerHTML=`<div class="mr-emoji">${def.emoji}</div><div class="mr-info"><div class="mr-name">${def.name}</div><div class="mr-desc">${def.desc}</div></div><div>${badge}</div>`;row.addEventListener('click',()=>openMission(p.id,i));list.appendChild(row);});
+  container.appendChild(list);
+}
+
+function renderLeaderboard(container){
+  const t=document.createElement('div');t.className='section-title';t.textContent='กระดาน XO ทุกคน';container.appendChild(t);
+  if(!players.length){const e=document.createElement('div');e.style.cssText='text-align:center;padding:40px;color:var(--muted);font-size:13px;';e.textContent='ยังไม่มีผู้เข้าร่วม';container.appendChild(e);return;}
+  const list=document.createElement('div');list.className='leaderboard';
+  players.forEach(p=>{const winP=checkWin(p.missions),done=p.missions.filter(m=>m.status==='done').length,winCells=winP?winP.flat():[],isMe=p.id===currentEmpId;const card=document.createElement('div');card.className='lb-card'+(winP?' lb-winner':'')+(isMe?' lb-me':'');const [rc,ri,rl]=roleTag(p.role);card.innerHTML=`<div class="lb-header"><div class="lb-avatar">${p.emoji}</div><div class="lb-info"><div class="lb-name">${p.name}${isMe?' <span style="font-size:9px;color:var(--accent);">(คุณ)</span>':''}</div><div class="lb-dept">${p.dept}</div><span class="id-tag ${rc}" style="margin-top:2px;">${ri} ${rl}</span></div><div style="text-align:right;"><div class="lb-score">${done}</div><div style="font-size:9px;color:var(--muted);">/ 9 ✓</div></div></div><div class="lb-mini-grid" id="lb-${p.id}"></div><div class="lb-prog"><div class="lb-prog-fill" style="width:${(done/9)*100}%"></div></div>${winP?'<div class="lb-win-banner">🏆 WINNER!</div>':''}`;list.appendChild(card);setTimeout(()=>{const g=document.getElementById('lb-'+p.id);if(!g)return;p.missions.forEach((m,i)=>{const def=MISSIONS[i],cell=document.createElement('div');let cls='lb-cell';if(m.status==='done')cls+=' lc-done';else if(m.status==='pending')cls+=' lc-pending';if(winCells.includes(i))cls+=' lc-win';cell.className=cls;cell.innerHTML=`<span>${def.emoji}</span>`;g.appendChild(cell);});},0);});
+  container.appendChild(list);
+}
+
+// ── MISSION MODAL ──
+function openMission(pid,mi){
+  const p=players.find(x=>x.id===pid),m=p.missions[mi],def=MISSIONS[mi];
+  document.getElementById('missionModalTitle').textContent=def.emoji+' '+def.name;
+  const body=document.getElementById('missionModalBody'),footer=document.getElementById('missionModalFooter');
+  let html=`<div class="mission-detail-box"><div class="md-emoji">${def.emoji}</div><div><div class="md-title">${def.name}</div><div class="md-desc">${def.desc}</div></div></div>`;
+  if(m.status==='done'){
+    html+=`<div class="done-state"><div class="big-icon">✅</div><div style="font-size:15px;font-weight:700;color:var(--glow);">ภารกิจสำเร็จแล้ว!</div>${m.evidenceData?`<div style="margin-top:11px;border-radius:11px;overflow:hidden;"><img src="${m.evidenceData}" style="width:100%;max-height:210px;object-fit:cover;"/></div>`:''}${m.note?`<div style="background:rgba(87,217,197,.08);border:1px solid rgba(87,217,197,.2);color:var(--accent);border-radius:9px;padding:10px;margin-top:9px;font-size:12px;">💬 ${m.note}</div>`:''}</div>`;
+    footer.innerHTML=`<button class="btn btn-ghost" onclick="closeModal('missionModal')" style="flex:1;">ปิด</button>`;
+  } else if(m.status==='pending'){
+    html+=`<div class="done-state"><div class="big-icon">⏳</div><div style="font-size:15px;font-weight:700;color:var(--gold);">รอ Admin ตรวจสอบ</div>${m.evidenceData?`<div style="margin-top:11px;border-radius:11px;overflow:hidden;"><img src="${m.evidenceData}" style="width:100%;max-height:190px;object-fit:cover;"/></div>`:''}${m.note?`<div style="background:rgba(87,217,197,.08);border:1px solid rgba(87,217,197,.2);color:var(--accent);border-radius:9px;padding:10px;margin-top:9px;font-size:12px;">💬 ${m.note}</div>`:''}</div>`;
+    footer.innerHTML=`<button class="btn btn-ghost" onclick="closeModal('missionModal')" style="flex:1;">ปิด</button>`;
+  } else {
+    if(def.ev){html+=`<div><div class="ev-upload" onclick="document.getElementById('fi_${pid}_${mi}').click()"><div class="ev-upload-icon">📸</div><p style="font-size:14px;font-weight:600;color:var(--text);">แตะเพื่ออัปโหลดรูปหลักฐาน</p><p style="font-size:11px;color:var(--muted);margin-top:3px;">รองรับ JPG, PNG, GIF</p></div><div id="ep_${pid}_${mi}"></div><input type="file" id="fi_${pid}_${mi}" class="file-hidden" accept="image/*" onchange="handleUpload(${pid},${mi},this)"/></div>`;}
+    else{html+=`<div class="form-group"><label class="form-label">ไอเดีย / ข้อความ</label><textarea class="form-input" id="mn_${pid}_${mi}" placeholder="พิมพ์ไอเดียลดพลังงานที่นี่..."></textarea></div>`;}
+    footer.innerHTML=`<button class="btn btn-ghost" onclick="closeModal('missionModal')">ยกเลิก</button><button class="btn btn-primary" onclick="submitMission(${pid},${mi})">📤 ส่งหลักฐาน</button>`;
+  }
+  body.innerHTML=html;openModal('missionModal');
+}
+function handleUpload(pid,mi,input){const file=input.files[0];if(!file)return;const r=new FileReader();r.onload=e=>{uploads[`${pid}_${mi}`]=e.target.result;const prev=document.getElementById(`ep_${pid}_${mi}`);if(prev)prev.innerHTML=`<div class="ev-preview"><img src="${e.target.result}"/><button class="ev-remove" onclick="removeUpload(${pid},${mi})">✕</button></div>`;};r.readAsDataURL(file);}
+function removeUpload(pid,mi){delete uploads[`${pid}_${mi}`];const p=document.getElementById(`ep_${pid}_${mi}`);if(p)p.innerHTML='';const f=document.getElementById(`fi_${pid}_${mi}`);if(f)f.value='';}
+async function submitMission(pid,mi){const p=players.find(x=>x.id===pid),def=MISSIONS[mi],key=`${pid}_${mi}`;if(def.ev){if(!uploads[key]){alert('กรุณาอัปโหลดรูปหลักฐานก่อน');return;}p.missions[mi].evidenceData=uploads[key];delete uploads[key];}else{const n=document.getElementById(`mn_${pid}_${mi}`);if(!n||!n.value.trim()){alert('กรุณาใส่ข้อความก่อน');return;}p.missions[mi].note=n.value.trim();}p.missions[mi].status='pending';await save();closeModal('missionModal');showToast('📤 ส่งหลักฐานแล้ว! รอ Admin ตรวจสอบนะคะ');setTimeout(()=>renderEmpTab(),250);}
+
+// ── ADMIN ──
+function adminTab(idx){adminTabIdx=idx;document.querySelectorAll('.admin-tab').forEach((t,i)=>t.classList.toggle('active',i===idx));renderAdminTab();}
+function renderAdminTab(){const c=document.getElementById('adminContent');c.innerHTML='';if(adminTabIdx===0)renderAdminPlayers(c);else if(adminTabIdx===1)renderAdminPending(c);else renderAdminStats(c);}
+
+function renderAdminPending(c){
+  if(!pendingRegs.length){c.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted);font-size:13px;">ไม่มีคำขอรอการอนุมัติ ✅</div>';return;}
+  const list=document.createElement('div');list.style.cssText='display:flex;flex-direction:column;gap:10px;';
+  pendingRegs.forEach(r=>{
+    const [rc,ri,rl]=roleTag(r.role);
+    const card=document.createElement('div');card.className='reg-card';
+    card.innerHTML=`<div class="reg-avatar">${r.emoji}</div><div class="reg-info"><div class="reg-name">${r.name}</div><div class="reg-dept">${r.dept}</div><span class="id-tag ${rc}" style="margin-top:2px;">${ri} ${rl}</span><div style="font-size:9px;color:var(--muted);margin-top:3px;">📅 ${r.submittedAt}</div></div><div class="reg-btns"><button class="btn btn-primary btn-sm" onclick="approvePending(${r.id})">✅ อนุมัติ</button><button class="btn btn-danger btn-sm" onclick="rejectPending(${r.id})">✕</button></div>`;
+    list.appendChild(card);
+  });
+  c.appendChild(list);
+}
+
+function renderAdminStats(c){
+  const total=players.length,winners=players.filter(p=>checkWin(p.missions)).length,done=players.reduce((s,p)=>s+p.missions.filter(m=>m.status==='done').length,0),pend=players.reduce((s,p)=>s+p.missions.filter(m=>m.status==='pending').length,0);
+  c.innerHTML=`<div class="admin-stats"><div class="astat"><div class="astat-num">${total}</div><div class="astat-lbl">ผู้เข้าร่วม</div></div><div class="astat"><div class="astat-num" style="color:var(--gold);">${winners}</div><div class="astat-lbl">ผู้ชนะ 🏆</div></div><div class="astat"><div class="astat-num">${done}</div><div class="astat-lbl">ภารกิจสำเร็จ</div></div><div class="astat"><div class="astat-num" style="color:var(--gold);">${pend}</div><div class="astat-lbl">รอตรวจสอบ</div></div></div><div class="section-title">ความคืบหน้า</div><div style="display:flex;flex-direction:column;gap:9px;">${players.map(p=>{const d=p.missions.filter(m=>m.status==='done').length,pct=Math.round((d/9)*100),wp=checkWin(p.missions);return`<div style="background:var(--card);border:1px solid rgba(126,217,87,.1);border-radius:13px;padding:13px;"><div style="display:flex;align-items:center;gap:9px;margin-bottom:9px;"><span style="font-size:20px;">${p.emoji}</span><div style="flex:1;"><div style="font-size:13px;font-weight:700;color:white;">${p.name} ${wp?'🏆':''}</div><div style="font-size:10px;color:var(--muted);">${p.dept}</div></div><div style="font-size:14px;font-weight:900;color:var(--glow);font-family:'Space Mono',monospace;">${d}/9</div></div><div style="height:5px;background:rgba(126,217,87,.1);border-radius:5px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--leaf),var(--glow));border-radius:5px;"></div></div></div>`;}).join('')}</div>`;
+}
+
+function renderAdminPlayers(c){
+  if(!players.length){c.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted);font-size:13px;">ยังไม่มีผู้เข้าร่วม<br>กด ＋ เพื่อเพิ่มเอง หรือรออนุมัติจากแท็บ "รออนุมัติ"</div>';return;}
+  const list=document.createElement('div');list.className='admin-player-list';
+  players.forEach(p=>{
+    const done=p.missions.filter(m=>m.status==='done').length;
+    const card=document.createElement('div');card.className='apl-card';
+    const [rc,ri,rl]=roleTag(p.role);
+    const bodyId=`aplBody_${p.id}`,arrId=`aplArr_${p.id}`;
+    card.innerHTML=`<div class="apl-header" onclick="toggleApl('${bodyId}','${arrId}')"><div class="apl-avatar">${p.emoji}</div><div class="apl-info"><div class="apl-name">${p.name}</div><div class="apl-dept">${p.dept} <span class="id-tag ${rc}" style="font-size:8px;">${ri} ${rl}</span></div></div><div class="apl-score" style="margin-right:5px;">${done}/9</div><div class="apl-toggle" id="${arrId}">▼</div></div><div class="apl-body collapsed" id="${bodyId}"></div><div class="apl-actions" id="aplAct_${p.id}"><button class="btn btn-ghost btn-sm" onclick="editPlayer(${p.id})">✏️ แก้ไข</button><button class="btn btn-danger btn-sm" onclick="deletePlayer(${p.id})">🗑️ ลบ</button></div>`;
+    list.appendChild(card);
+    const body=card.querySelector('.apl-body');
+    p.missions.forEach((m,i)=>{const def=MISSIONS[i],row=document.createElement('div');row.className='amr';let sb=m.status==='done'?'<span class="amr-status s-done">✅ สำเร็จ</span>':m.status==='pending'?'<span class="amr-status s-pending">⏳ รอตรวจ</span>':'<span class="amr-status s-none">— ยังไม่ทำ</span>';let ev=m.evidenceData?`<div class="amr-evidence"><img src="${m.evidenceData}" onclick="viewFull('${m.evidenceData}')"/></div>`:m.note?`<div class="amr-note">💬 ${m.note}</div>`:'';let btns='';if(m.status!=='done')btns+=`<button class="btn btn-primary btn-sm" onclick="adminApprove(${p.id},${i})">✅ อนุมัติ</button>`;if(m.status==='done')btns+=`<button class="btn btn-ghost btn-sm" onclick="adminRevoke(${p.id},${i})">↩ ยกเลิก</button>`;if(m.status==='none')btns+=`<button class="btn btn-ghost btn-sm" onclick="adminMark(${p.id},${i})">📋 มาร์ค</button>`;row.innerHTML=`<div class="amr-top"><div class="amr-emoji">${def.emoji}</div><div class="amr-name">${def.name}</div>${sb}</div>${ev}<div class="amr-btns">${btns}</div>`;body.appendChild(row);});
+  });
+  c.appendChild(list);
+}
+
+function toggleApl(bodyId,arrId){const body=document.getElementById(bodyId),arr=document.getElementById(arrId);if(!body||!arr)return;const pid=bodyId.replace('aplBody_',''),act=document.getElementById('aplAct_'+pid),isOpen=!body.classList.contains('collapsed');body.classList.toggle('collapsed',isOpen);arr.classList.toggle('open',!isOpen);if(act)act.style.display=isOpen?'none':'flex';}
+async function adminApprove(pid,mi){const p=players.find(x=>x.id===pid),wasW=checkWin(p.missions);p.missions[mi].status='done';await save();renderAdminTab();if(!wasW&&checkWin(p.missions))showWinner(p);if(currentEmpId===pid)renderEmpTab();}
+async function adminRevoke(pid,mi){const p=players.find(x=>x.id===pid);p.missions[mi].status='none';p.missions[mi].evidenceData=null;p.missions[mi].note=null;await save();renderAdminTab();if(currentEmpId===pid)renderEmpTab();}
+async function adminMark(pid,mi){const p=players.find(x=>x.id===pid);p.missions[mi].status='pending';await save();renderAdminTab();}
+function showWinner(p){document.getElementById('wName').textContent=p.emoji+' '+p.name;document.getElementById('wDept').textContent=p.dept;document.getElementById('winnerOv').classList.add('show');}
+function viewFull(src){const ov=document.createElement('div');ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.97);z-index:600;display:flex;align-items:center;justify-content:center;cursor:zoom-out;padding:14px;';ov.innerHTML=`<img src="${src}" style="max-width:100%;max-height:100%;border-radius:11px;object-fit:contain;">`;ov.onclick=()=>document.body.removeChild(ov);document.body.appendChild(ov);}
+
+// ── ADD/EDIT PLAYER ──
+function openAddPlayer(){editingPlayerId=null;selectedEmojiAdd='🌿';document.getElementById('addPlayerTitle').textContent='➕ เพิ่มผู้เข้าร่วม';document.getElementById('inputName').value='';document.getElementById('inputDept').value='';document.getElementById('inputRole').value='staff';setEmojiGroup('add','🌿');openModal('addPlayerModal');setTimeout(()=>document.getElementById('inputName').focus(),380);}
+function editPlayer(id){const p=players.find(x=>x.id===id);if(!p)return;editingPlayerId=id;selectedEmojiAdd=p.emoji;document.getElementById('addPlayerTitle').textContent='✏️ แก้ไขข้อมูล';document.getElementById('inputName').value=p.name;document.getElementById('inputDept').value=p.dept;document.getElementById('inputRole').value=p.role;setEmojiGroup('add',p.emoji);openModal('addPlayerModal');}
+function setEmojiGroup(group,e){document.querySelectorAll(`.ep-item[data-g="${group}"]`).forEach(el=>el.classList.toggle('selected',el.dataset.e===e));if(group==='add')selectedEmojiAdd=e;else selectedEmojiReg=e;}
+document.querySelectorAll('.ep-item').forEach(el=>{el.addEventListener('click',()=>setEmojiGroup(el.dataset.g,el.dataset.e));});
+async function savePlayer(){const name=document.getElementById('inputName').value.trim(),dept=document.getElementById('inputDept').value.trim(),role=document.getElementById('inputRole').value;if(!name||!dept){alert('กรุณากรอกชื่อและแผนก');return;}if(editingPlayerId!==null){const p=players.find(x=>x.id===editingPlayerId);p.name=name;p.dept=dept;p.role=role;p.emoji=selectedEmojiAdd;}else{players.push({id:Date.now(),name,dept,role,emoji:selectedEmojiAdd,missions:MISSIONS.map(()=>({status:'none',evidenceData:null,note:null}))});}await save();closeModal('addPlayerModal');renderAdminTab();}
+async function deletePlayer(id){if(!confirm('ยืนยันการลบผู้เข้าร่วมคนนี้?'))return;players=players.filter(p=>p.id!==id);if(currentEmpId===id)currentEmpId=null;await save();renderAdminTab();}
+
+// ── MODALS ──
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-overlay').forEach(ov=>{ov.addEventListener('click',e=>{if(e.target===ov)ov.classList.remove('open');});});
+
+// ── INIT ──
+(async () => {
+  // show loading
+  const loadOv = document.createElement('div');
+  loadOv.style.cssText = 'position:fixed;inset:0;z-index:9999;background:var(--dark);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;';
+  loadOv.innerHTML = '<div style="font-size:52px;animation:float 1.5s ease-in-out infinite;">🌍</div><div style="font-size:14px;color:var(--muted);">กำลังโหลดข้อมูล...</div><div style="width:48px;height:4px;background:rgba(126,217,87,.15);border-radius:4px;overflow:hidden;"><div style="height:100%;width:40%;background:var(--glow);border-radius:4px;animation:loadBar 1s ease-in-out infinite alternate;"></div></div><div style="font-size:11px;color:var(--muted);margin-top:4px;">เชื่อมต่อ Google Sheet...</div>';
+  const style = document.createElement('style');
+  style.textContent = '@keyframes loadBar{from{margin-left:0}to{margin-left:60%}}';
+  document.head.appendChild(style);
+  document.body.appendChild(loadOv);
+
+  await load();
+
+  document.body.removeChild(loadOv);
+  updatePendingBadge();
+})();
+</script>
+</body>
+</html>
